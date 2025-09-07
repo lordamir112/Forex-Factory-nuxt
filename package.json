@@ -12,6 +12,7 @@
   "dependencies": {
     "@iconify/vue": "^5.0.0",
     "@pinia/nuxt": "^0.11.2",
+    "axios": "^1.11.0",
     "lodash": "^4.17.21",
     "nuxt": "^4.1.1",
     "pinia": "^3.0.3",

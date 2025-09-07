@@ -34,6 +34,11 @@
                       {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
                     </span>
                   </th>
+                  <th
+                    class="px-5 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none"
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -42,12 +47,21 @@
                   :key="item.email"
                   class="hover:bg-gray-50"
                 >
-                  <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.firstName }}</td>
+                  <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.lastName }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.email }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.company.department }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.company.title }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ formatters.formatDate(item.birthDate) }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.role }}</td>
+                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">
+
+                    <Icon 
+                      icon="mdi:delete-forever"
+                      style="color: crimson; font-size: 35px; cursor: pointer;"
+                      
+                      @click="$emit('delete-user', item.id)"
+                     />
+                  </td>
                 </tr>
                 <tr v-if="paginatedItems.length === 0">
                   <td colspan="6" class="px-4 py-2 text-center text-gray-500">No records found</td>
@@ -88,6 +102,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import formatters from '../utils/formatters' // مسیر utility تو پروژه
+import { Icon } from "@iconify/vue";
 
 const props = defineProps<{
   items: Array<{
@@ -98,9 +113,9 @@ const props = defineProps<{
     role: string
   }>
 }>()
-
+console.log(props.items)
 const columns = [
-  { key: 'firstName', label: 'Name' },
+  { key: 'lastName', label: 'Name' },
   { key: 'email', label: 'Email' },
   { key: 'company.department', label: 'Department' },
   { key: 'company.title', label: 'Title' },
