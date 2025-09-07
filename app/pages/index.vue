@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1>Nuxt 4 App ✅</h1>
-    <NuxtLink to="/employees">Go to Employees</NuxtLink>
+    <Employees />
   </div>
 </template>
+<script setup lang="ts">
+ import Employees from "./employees/index.vue"
+
+</script>
