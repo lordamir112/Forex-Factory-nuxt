@@ -14,6 +14,11 @@
             placeholder="Search..."
             class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
           />
+          <Icon
+            icon="mdi:delete-forever"
+            style="color: crimson; font-size: 35px; cursor: pointer;"
+            @click="router.push('employees/new')"
+          />
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
           </select>
@@ -97,6 +102,8 @@
 import { ref, watch } from "vue"
 import { Icon } from "@iconify/vue"
 import formatters from "../utils/formatters"
+import { useRouter } from "vue-router"
+const router = useRouter()
 
 const props = defineProps<{
   items: any[]

@@ -1,4 +1,4 @@
-// composables/useEmployees.ts
+
 import { ref } from "vue"
 import { useAbortableFetch } from "./useAbortableFetch"
 
@@ -10,11 +10,11 @@ export function useEmployees() {
   const loading = ref(false)
 
   // pagination state
-  const limit = ref(10)   // rows per page
-  const skip = ref(0)     // offset
+  const limit = ref(10)
+  const skip = ref(0)
   const currentPage = ref(1)
 
-  // fetch employees with pagination
+  // fetch employees
   async function loadEmployees() {
     loading.value = true
     try {
@@ -28,17 +28,13 @@ export function useEmployees() {
     }
   }
 
-  // search employees (throttled)
+  // search employees
   function searchEmployees(query: string) {
-    if (!query) {
-      return loadEmployees()
-    }
+    if (!query) return loadEmployees()
 
     loading.value = true
     throttledFetch(
-      `https://dummyjson.com/users/search?q=${encodeURIComponent(
-        query
-      )}&limit=${limit.value}&skip=${skip.value}`,
+      `https://dummyjson.com/users/search?q=${encodeURIComponent(query)}&limit=${limit.value}&skip=${skip.value}`,
       {},
       (data) => {
         employees.value = data.users
@@ -52,21 +48,81 @@ export function useEmployees() {
     )
   }
 
-  // delete employee
-  async function deleteEmployee(id: number) {
-    await doFetch(`https://dummyjson.com/users/${id}`, { method: "DELETE" })
-    employees.value = employees.value.filter((u) => u.id !== id)
-    total.value--
+  // create employee (optimistic UI)
+  async function createEmployee(payload: any) {
+    const tempId = Date.now()
+    const optimisticUser = { id: tempId, ...payload }
+
+    // optimistic insert
+    employees.value.unshift(optimisticUser)
+    total.value++
+
+    try {
+      const data = await doFetch("https://dummyjson.com/users/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      // replace temp user with server response
+      employees.value = employees.value.map((u) =>
+        u.id === tempId ? data : u
+      )
+      return data
+    } catch (err) {
+      // rollback
+      employees.value = employees.value.filter((u) => u.id !== tempId)
+      total.value--
+      throw err
+    }
   }
 
-  // go to specific page
+  // update employee (optimistic UI)
+  async function updateEmployee(id: number, payload: any) {
+    const oldUser = employees.value.find((u) => u.id === id)
+    if (!oldUser) return
+
+    const backup = { ...oldUser }
+    Object.assign(oldUser, payload)
+
+    try {
+      const data = await doFetch(`https://dummyjson.com/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      Object.assign(oldUser, data)
+      return data
+    } catch (err) {
+      // rollback
+      Object.assign(oldUser, backup)
+      throw err
+    }
+  }
+
+  // delete employee
+  async function deleteEmployee(id: number) {
+    const backup = [...employees.value]
+    employees.value = employees.value.filter((u) => u.id !== id)
+    total.value--
+
+    try {
+      await doFetch(`https://dummyjson.com/users/${id}`, { method: "DELETE" })
+    } catch (err) {
+      employees.value = backup
+      total.value++
+      throw err
+    }
+  }
+
+  // pagination helpers
   function goToPage(page: number) {
     currentPage.value = page
     skip.value = (page - 1) * limit.value
     loadEmployees()
   }
 
-  // computed total pages
   function totalPages() {
     return Math.ceil(total.value / limit.value)
   }
@@ -80,6 +136,8 @@ export function useEmployees() {
     loading,
     loadEmployees,
     searchEmployees,
+    createEmployee,
+    updateEmployee,
     deleteEmployee,
     goToPage,
     totalPages,
