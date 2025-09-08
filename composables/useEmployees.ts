@@ -50,12 +50,14 @@ export function useEmployees() {
 
   // create employee (optimistic UI)
   async function createEmployee(payload: any) {
+    
     const tempId = Date.now()
     const optimisticUser = { id: tempId, ...payload }
 
     // optimistic insert
     employees.value.unshift(optimisticUser)
     total.value++
+    loading.value = true
 
     try {
       const data = await doFetch("https://dummyjson.com/users/add", {
@@ -74,6 +76,9 @@ export function useEmployees() {
       employees.value = employees.value.filter((u) => u.id !== tempId)
       total.value--
       throw err
+    }
+    finally {
+      loading.value = false
     }
   }
 

@@ -15,10 +15,10 @@
           />
           <div class="flex items-center gap-2">
             <Icon
-            icon="mdi:add-box"
+            icon="mdi:add-circle"
             style="color: green; font-size: 35px; cursor: pointer;"
              title="Add Employee"
-            
+            @click="router.push('/employees/new')"
           />
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
