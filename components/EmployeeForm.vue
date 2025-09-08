@@ -1,13 +1,15 @@
 <template>
   <form @submit.prevent="onSubmit" class="space-y-4 bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
     <!-- Back Icon -->
-    <Icon
-      icon="mdi:arrow-back-circle"
-      style="color: black; font-size: 35px; cursor: pointer;"
-      title="Back to Employees"
-      @click="router.push('/employees')"
-    />
-
+    <div class="flex  justify-between">
+      <Icon
+          icon="mdi:arrow-back-circle"
+          style="color: black; font-size: 35px; cursor: pointer;"
+          title="Back to Employees"
+          @click="router.push('/employees')"
+        />
+        <h1 class="text-xl font-bold mb-4">{{title}}</h1>
+    </div>
     <!-- Name -->
     <div>
       <label class="block text-sm font-medium mb-1">Name</label>
@@ -73,12 +75,10 @@
       <label class="block text-sm font-medium mb-1">Status</label>
       <Field
         name="status"
-        as="select"
+        as="input"
+        type="text"
         class="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      >
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </Field>
+      />
       <ErrorMessage name="status" class="text-red-500 text-sm mt-1" />
     </div>
 
@@ -99,6 +99,7 @@ import * as yup from 'yup'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import LoadingSpinner from "./LoadingSpinner.vue"
+import formatters from '~~/utils/formatters'
 
 const router = useRouter()
 
@@ -107,19 +108,21 @@ const props = defineProps<{
   initial?: any
   submitLabel?: string
   loading?: boolean
+  title?: string
 }>()
 
 const emit = defineEmits(['submit'])
 
+console.log('props.initial', )
 const { handleSubmit,  } = useForm({
   validateOnMount: false,
   initialValues: {
-    name: props.initial?.name || '',
+    name: props.initial?.lastName || '',
     email: props.initial?.email || '',
-    department: props.initial?.department || '',
-    title: props.initial?.title || '',
-    hireDate: props.initial?.hireDate || '',
-    status: props.initial?.status || 'active',
+    department: props.initial?.company?.department || '',
+    title: props.initial?.company?.title || '',
+    hireDate: formatters.formFormatDate(props.initial?.birthDate) || '2025-09-10',
+    status: props.initial?.role || '',
   },
   validationSchema: yup.object({
     name: yup.string().required('Name is required'),
@@ -127,7 +130,7 @@ const { handleSubmit,  } = useForm({
     department: yup.string().required('Department is required'),
     title: yup.string(),
     hireDate: yup.date().nullable(),
-    status: yup.string().oneOf(['active','inactive']).required('Status is required'),
+    status: yup.string().required('Name is required'),
   }),
 })
 

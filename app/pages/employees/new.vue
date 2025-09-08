@@ -1,8 +1,12 @@
 
 <template>
   <div class="p-6">
-    <h1 class="text-xl font-bold mb-4">New Employee</h1>
-    <EmployeeForm submit-label="Create" @submit="handleCreate" :loading="loading" />
+    <EmployeeForm 
+    submit-label="Create" 
+    @submit="handleCreate" 
+    title="Create Employee"
+    :loading="loading" />
+
     <ConfirmModal
     v-model="openModal"
     title="Create employee"
@@ -20,7 +24,7 @@ import ConfirmModal from "../../../components/AlertModal.vue"
 
 const { createEmployee,loading } = useEmployees()
 const openModal = ref(false)
-const alertMessage = ref("test")
+const alertMessage = ref("")
 
 async function handleCreate(payload: any) {
   try {

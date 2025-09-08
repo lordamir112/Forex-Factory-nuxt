@@ -1,52 +1,64 @@
-<script setup lang="ts">
-import EmployeeForm from "../../../../components/EmployeeForm.vue"
-import { useStore } from "../../../../stores/store"
-import { useRoute, useRouter } from "vue-router"
-import { ref, onMounted } from "vue"
-
-const route = useRoute()
-const router = useRouter()
-const store = useStore()
-
-const employee = ref<any | null>(null)
-
-onMounted(async () => {
-  const id = Number(route.params.id)
-  if (!store.selected || Number(store.selected.id) !== id) {
-    try {
-      await store.selectEmployee(id)
-    } catch (e) {
-      console.error("Failed to fetch selected employee:", e)
-    }
-  }
-  employee.value = store.selected
-})
-
-async function handleUpdate(payload: any) {
-  try {
-    await store.updateEmployee(Number(route.params.id), payload)
-    router.push("/employees")
-  } catch (e) {
-    alert("Failed to update employee")
-  }
-}
-</script>
-
 <template>
   <div class="p-6">
-    <button class="mb-4 px-3 py-1 bg-gray-300 rounded" @click="router.push('/employees')">
-      ← Back to List
-    </button>
-
-    <h1 class="text-xl font-bold mb-4">Edit Employee</h1>
-
     <EmployeeForm
       v-if="employee"
       :initial="employee"
       submit-label="Save"
       @submit="handleUpdate"
+      :loading="loading"
+      title="Edit Employee"
     />
-
-    <p v-else>Loading...</p>
+    <ConfirmModal
+        v-model="openModal"
+        title="Edit employee"
+        :message="alertMessage"
+        :show-cancel="false"
+        @confirm="openModal = false"
+      />
   </div>
 </template>
+
+<script setup lang="ts">
+import EmployeeForm from "../../../../components/EmployeeForm.vue"
+import { useStore } from "../../../../stores/store"
+import { useRoute, useRouter } from "vue-router"
+import { ref, onMounted } from "vue"
+import { useEmployees } from "~~/composables/useEmployees"
+const { updateEmployee ,loading } = useEmployees()
+import ConfirmModal from "../../../../components/AlertModal.vue"
+
+
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const openModal = ref(false)
+const alertMessage = ref("")
+const employee = store.employee
+
+
+async function handleUpdate(payload: any) {
+
+  const body = {
+    ...payload,
+    firstName : payload.name,
+    role: payload.status,
+    company: {
+      department: payload.department,
+      title: payload.title
+    },
+  }
+  try {
+    await updateEmployee(store.employee.id, body).then(() => 
+    {
+      openModal.value = true
+      alertMessage.value = "Employee edited successfully"
+    })
+  } catch (e) {
+      openModal.value = true
+      alertMessage.value = "Failed to edit employee"
+  }
+}
+
+</script>
+
+<
