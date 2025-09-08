@@ -23,6 +23,13 @@
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
           </select>
+          <!-- <input
+            v-model="props.limit"
+            type="text"
+            placeholder="limit"
+            class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg "
+            style="width: 100px;"
+          /> -->
           </div>
 
         </div>
@@ -50,7 +57,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50">
+                <tr v-for="item in sortedItems" :key="item.id" class="hover:bg-gray-50">
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.lastName }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.email }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.company.department }}</td>
@@ -75,11 +82,11 @@
             </table>
 
             <!-- Pagination -->
-            <div class="px-5 py-5 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+            <div class="px-5 py-5 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between gap-2">
               <span class="text-xs xs:text-sm text-gray-900 mb-2 xs:mb-0">
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
-              <div class="inline-flex">
+              <div class="inline-flex items-center gap-2">
                 <button
                   class="text-sm bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-l disabled:opacity-50"
                   :disabled="currentPage === 1"
@@ -93,6 +100,21 @@
                   @click="$emit('page-change', currentPage + 1)"
                 >
                   Next
+                </button>
+
+                <!-- Go to page input -->
+                <input
+                  type="number"
+                  min="1"
+                  :max="totalPages"
+                  v-model.number="jumpPage"
+                  @keydown.enter="goToPage"
+                  placeholder="page"
+                  class="p-2 border rounded w-50 ml-2"/>
+                <button
+                  class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 ml-1  "
+                  @click="goToPage">
+                  Go
                 </button>
               </div>
             </div>
@@ -112,11 +134,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
+import { ref, watch,computed } from "vue"
 import { Icon } from "@iconify/vue"
 import formatters from "../utils/formatters"
 import { useRouter } from "vue-router"
-const deleteIds = ref<number[]>([])
 import LoadingSpinner from "./LoadingSpinner.vue"
 const router = useRouter()
 import ConfirmModal from "./AlertModal.vue"
@@ -127,8 +148,19 @@ const props = defineProps<{
   limit: number
   loading: boolean
 }>()
-
 const openModal = ref(false)
+
+
+const jumpPage = ref<number | null>(null)
+const deleteIds = ref<number[]>([])
+
+function goToPage() {
+  if (!jumpPage.value) return
+  const page = Math.min(Math.max(jumpPage.value, 1), props.totalPages)
+  emit('page-change', page)
+  jumpPage.value = null
+}
+
 
 function handleDelete() {
   if (deleteIds.value.length > 0) {
@@ -182,4 +214,30 @@ function sortByColumn(key: string) {
     sortOrder.value = "asc"
   }
 }
+const sortedItems = computed(() => {
+  if (!sortKey.value) return props.items
+
+  const keys = sortKey.value.split(".") // برای key های nested مثل company.department
+  return [...props.items].sort((a, b) => {
+    let valA = a
+    let valB = b
+
+    keys.forEach(k => {
+      valA = valA?.[k]
+      valB = valB?.[k]
+    })
+
+    if (valA == null) return 1
+    if (valB == null) return -1
+
+    if (typeof valA === "string") valA = valA.toLowerCase()
+    if (typeof valB === "string") valB = valB.toLowerCase()
+
+    if (valA < valB) return sortOrder.value === "asc" ? -1 : 1
+    if (valA > valB) return sortOrder.value === "asc" ? 1 : -1
+    return 0
+  })
+})
+
+
 </script>

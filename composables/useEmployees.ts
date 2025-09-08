@@ -16,6 +16,7 @@ export function useEmployees() {
 
   // fetch employees
   async function loadEmployees() {
+    console.log('limit.value', limit.value)
     loading.value = true
     try {
       const data = await doFetch(

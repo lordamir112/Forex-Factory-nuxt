@@ -51,5 +51,6 @@ function handlePageChange(page: number) {
 async function handleDelete(id: number) {
   await deleteEmployee(id)
 }
+
 </script>
 
