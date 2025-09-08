@@ -86,6 +86,7 @@
     <button
       type="submit"
       class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg mt-4 flex justify-center items-center gap-2 space-x-2 hover:bg-blue-700"
+      :disabled="props.loading"
     >
       {{ submitLabel }}
     <LoadingSpinner  v-if="props.loading" />
