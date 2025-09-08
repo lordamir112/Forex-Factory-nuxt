@@ -5,6 +5,7 @@
     :currentPage="currentPage"
     :totalPages="totalPages()"
     :limit="limit"
+    :loading="loading"
     @search="handleSearch"
     @limit-change="handleLimitChange"
     @page-change="handlePageChange"
@@ -23,10 +24,12 @@ const {
   searchEmployees,
   deleteEmployee,
   goToPage,
+  loading,
   currentPage,
   totalPages,
   limit,
 } = useEmployees()
+
 
 // initial load
 onMounted(() => loadEmployees())

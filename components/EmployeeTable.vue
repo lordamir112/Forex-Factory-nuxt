@@ -5,7 +5,6 @@
         <h2 class="text-2xl font-semibold leading-tight mb-4 text-white shadow-2xl">
           Employees
         </h2>
-
         <!-- Search & Page Size -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
           <input
@@ -14,14 +13,18 @@
             placeholder="Search..."
             class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
           />
-          <Icon
-            icon="mdi:delete-forever"
-            style="color: crimson; font-size: 35px; cursor: pointer;"
+          <div class="flex items-center gap-2">
+            <Icon
+            icon="mdi:add-box"
+            style="color: green; font-size: 35px; cursor: pointer;"
+             title="Add Employee"
             
           />
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
           </select>
+          </div>
+
         </div>
 
         <!-- Table -->
@@ -62,8 +65,11 @@
                     />
                   </td>
                 </tr>
-                <tr v-if="!items.length">
+                <tr v-if="!items.length && !props.loading">
                   <td colspan="7" class="px-4 py-2 text-center text-gray-500">No records found</td>
+                </tr>
+                <tr v-if="props.loading">
+                  <td colspan="7" class="px-4 py-2 text-center text-gray-500"><LoadingSpinner/></td>
                 </tr>
               </tbody>
             </table>
@@ -111,7 +117,7 @@ import { Icon } from "@iconify/vue"
 import formatters from "../utils/formatters"
 import { useRouter } from "vue-router"
 const deleteIds = ref<number[]>([])
-
+import LoadingSpinner from "./LoadingSpinner.vue"
 const router = useRouter()
 import ConfirmModal from "./AlertModal.vue"
 const props = defineProps<{
@@ -119,6 +125,7 @@ const props = defineProps<{
   currentPage: number
   totalPages: number
   limit: number
+  loading: boolean
 }>()
 
 const openModal = ref(false)
@@ -132,8 +139,8 @@ function handleDelete() {
   }
   openModal.value = false
 }
+
 function handleCancel() {
-  console.log('Cancelled')
   openModal.value = false
 }
 
