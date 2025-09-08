@@ -39,7 +39,6 @@ const {
 
 const store = useStore()
 
-console.log(store)
 // initial load
 onMounted(() => {
   if(store.tableOptions.searchQuery.length > 0){

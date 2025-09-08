@@ -5,6 +5,7 @@
     submit-label="Create" 
     @submit="handleCreate" 
     title="Create Employee"
+    route="/employees"
     :loading="loading" />
 
     <ConfirmModal

@@ -6,7 +6,7 @@
           icon="mdi:arrow-back-circle"
           style="color: black; font-size: 35px; cursor: pointer;"
           title="Back to Employees"
-          @click="router.push('/employees')"
+          @click="router.push(route)"
         />
         <h1 class="text-xl font-bold mb-4">{{title}}</h1>
     </div>
@@ -109,11 +109,12 @@ const props = defineProps<{
   submitLabel?: string
   loading?: boolean
   title?: string
+  route: string,
 }>()
 
 const emit = defineEmits(['submit'])
 
-console.log('props.initial', )
+
 const { handleSubmit,  } = useForm({
   validateOnMount: false,
   initialValues: {

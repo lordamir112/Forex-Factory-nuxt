@@ -7,6 +7,7 @@
       @submit="handleUpdate"
       :loading="loading"
       title="Edit Employee"
+      :route="`/employees/${employee?.id}`"
     />
     <ConfirmModal
         v-model="openModal"

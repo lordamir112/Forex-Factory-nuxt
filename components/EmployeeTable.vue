@@ -6,13 +6,14 @@
           Employees
         </h2>
         <!-- Search & Page Size -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2 px-5">
           <input
             v-model="localSearch"
             type="text"
             placeholder="Search..."
             class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
           />
+          <h1 class="text-center text-xl font-bold mb-4"> Employees List </h1>
           <div class="flex items-center gap-2">
             <Icon 
               v-if="selectedIds.length > 0"
@@ -29,17 +30,8 @@
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
           </select>
-          <!-- <input
-            v-model="props.limit"
-            type="text"
-            placeholder="limit"
-            class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg "
-            style="width: 100px;"
-          /> -->
           </div>
-
         </div>
-
         <!-- Table -->
         <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
           <div class="inline-block min-w-full shadow rounded-lg overflow-hidden bg-white">
@@ -144,8 +136,8 @@
   </div>
  <ConfirmModal
     v-model="openModal"
-    title="Delete employee"
-    message="Are you sure you want to delete this employee?"
+    :title="`Delete employee${deleteIds.length > 1 ? 's' : ''}`"
+    :message="`Are you sure you want to delete ${deleteIds.length > 1 ? 'these employees' : 'this employee'}?`"
     @confirm="handleDelete"
     @cancel="handleCancel"
   />
