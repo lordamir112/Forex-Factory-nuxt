@@ -17,7 +17,7 @@
           <Icon
             icon="mdi:delete-forever"
             style="color: crimson; font-size: 35px; cursor: pointer;"
-            @click="router.push('employees/new')"
+            
           />
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
@@ -58,7 +58,7 @@
                     <Icon
                       icon="mdi:delete-forever"
                       style="color: crimson; font-size: 35px; cursor: pointer;"
-                      @click="$emit('delete-user', item.id)"
+                      @click="openDelete(item.id)"
                     />
                   </td>
                 </tr>
@@ -96,6 +96,13 @@
       </div>
     </div>
   </div>
+ <ConfirmModal
+    v-model="openModal"
+    title="Delete employee"
+    message="Are you sure you want to delete this employee?"
+    @confirm="handleDelete"
+    @cancel="handleCancel"
+  />
 </template>
 
 <script setup lang="ts">
@@ -103,14 +110,37 @@ import { ref, watch } from "vue"
 import { Icon } from "@iconify/vue"
 import formatters from "../utils/formatters"
 import { useRouter } from "vue-router"
-const router = useRouter()
+const deleteIds = ref<number[]>([])
 
+const router = useRouter()
+import ConfirmModal from "./AlertModal.vue"
 const props = defineProps<{
   items: any[]
   currentPage: number
   totalPages: number
   limit: number
 }>()
+
+const openModal = ref(false)
+
+function handleDelete() {
+  if (deleteIds.value.length > 0) {
+    deleteIds.value.forEach((id) => {
+      emit('delete-user', id) 
+    })
+    deleteIds.value = []
+  }
+  openModal.value = false
+}
+function handleCancel() {
+  console.log('Cancelled')
+  openModal.value = false
+}
+
+function openDelete(id: number) {
+  deleteIds.value = [id] 
+  openModal.value = true
+}
 
 const emit = defineEmits(["search", "limit-change", "page-change", "delete-user"])
 
