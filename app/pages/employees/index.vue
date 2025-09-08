@@ -1,44 +1,52 @@
+
 <template>
-  <div>
-    <EmployeeTable :items="items"  @delete-user="deleteUser" />
-  </div>
+  <EmployeeTable
+    :items="employees"
+    :currentPage="currentPage"
+    :totalPages="totalPages()"
+    :limit="limit"
+    @search="handleSearch"
+    @limit-change="handleLimitChange"
+    @page-change="handlePageChange"
+    @delete-user="handleDelete"
+  />
 </template>
 
 <script setup lang="ts">
-import EmployeeTable from '../../../components/EmployeeTable.vue'
-import { ref, watch } from 'vue'
-import api from '../../../composables/axios'
+import EmployeeTable from "../../../components/EmployeeTable.vue"
+import { onMounted } from "vue"
+import { useEmployees } from "../../../composables/useEmployees"
 
-const items = ref([])
+const {
+  employees,
+  loadEmployees,
+  searchEmployees,
+  deleteEmployee,
+  goToPage,
+  currentPage,
+  totalPages,
+  limit,
+} = useEmployees()
 
-const getData = async () => {
-  try {
-    const response = await api.get('users')
-    console.log('response.data.users', response.data.users)
-    items.value = response.data.users
-  } catch (e) {
-    console.error(e)
-  }
+// initial load
+onMounted(() => loadEmployees())
+
+// handlers from child
+function handleSearch(query: string) {
+  searchEmployees(query)
 }
 
-const deleteUser = async (userId: string) => {
-  alert("asds")
-  console.log('first', userId)
-  try {
-    await api.delete(`users/${userId}`)
-    items.value = items.value.filter((user) => user.id !== userId)
-  } catch (e) {
-    console.error(e)
-  }
+function handleLimitChange(newLimit: number) {
+  limit.value = newLimit
+  goToPage(1)
 }
 
+function handlePageChange(page: number) {
+  goToPage(page)
+}
 
-getData()
+async function handleDelete(id: number) {
+  await deleteEmployee(id)
+}
 </script>
 
-<style>
-.cont {
-	background-color: rgb(51 65 85 / var(--tw-bg-opacity, 1));
-;
-}
-</style>
