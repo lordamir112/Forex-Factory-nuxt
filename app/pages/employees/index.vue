@@ -22,8 +22,6 @@ import { useStore } from "../../../stores/store"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
-
-
 const {
   employees,
   loadEmployees,
@@ -35,22 +33,9 @@ const {
   totalPages,
   limit,
 } = useEmployees()
-
-
 const store = useStore()
 
-// initial load
-onMounted(() => {
-  if(store.tableOptions.searchQuery.length > 0){
-    searchEmployees(store.tableOptions.searchQuery)
-  }
-  limit.value = store.tableOptions.limit
-  goToPage(store.tableOptions.currentPage)
-  loadEmployees()
-}
 
-
-)
 
 // handlers from child
 function handleSearch(query: string) {
@@ -78,13 +63,16 @@ async function handleDelete(id: number) {
   await deleteEmployee(id)
 }
 
-// onMounted(() => {
-//   store.setTableOptions( options => ({
-//     ...options,
-//     currentPage: currentPage.value,
-//     limit: limit.value,
-//   }) )
-// })
+// initial load
+onMounted(() => {
+  if(store.tableOptions.searchQuery.length > 0){
+    searchEmployees(store.tableOptions.searchQuery)
+  }
+  limit.value = store.tableOptions.limit
+  goToPage(store.tableOptions.currentPage)
+  loadEmployees()
+}
 
+)
 </script>
 

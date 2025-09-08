@@ -23,12 +23,11 @@
 import EmployeeForm from "../../../../components/EmployeeForm.vue"
 import { useStore } from "../../../../stores/store"
 import { useRoute, useRouter } from "vue-router"
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import { useEmployees } from "~~/composables/useEmployees"
-const { updateEmployee ,loading } = useEmployees()
 import ConfirmModal from "../../../../components/AlertModal.vue"
 
-
+const { updateEmployee ,loading } = useEmployees()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
@@ -38,7 +37,6 @@ const employee = store.employee
 
 
 async function handleUpdate(payload: any) {
-
   const body = {
     ...payload,
     firstName : payload.name,
@@ -49,8 +47,9 @@ async function handleUpdate(payload: any) {
     },
   }
   try {
-    await updateEmployee(store.employee.id, body).then(() => 
+    await updateEmployee(store.employee.id, body).then((res) => 
     {
+      store.setEmployee(res)
       openModal.value = true
       alertMessage.value = "Employee edited successfully"
     })

@@ -17,11 +17,11 @@
           {{ employee?.firstName ?? "" }} {{ employee?.lastName ?? "" }}
         </h1>
 
-        <p class="text-gray-600"><span class="font-semibold">Email:</span> {{ employee?.email ?? "" }}</p>
-        <p class="text-gray-600"><span class="font-semibold">Department:</span> {{ employee?.company?.department ?? "" }}</p>
-        <p class="text-gray-600"><span class="font-semibold">Title:</span> {{ employee?.company?.title ?? "" }}</p>
-        <p class="text-gray-600"><span class="font-semibold">Status:</span> {{ employee?.role ?? "" }}</p>
-        <p class="text-gray-600"><span class="font-semibold">Hire Date:</span> {{ employee?.birthDate ?? "" }}</p>
+        <p class="text-gray-600"><span class="font-semibold">Email:</span> {{ employee?.email ?? "no data" }}</p>
+        <p class="text-gray-600"><span class="font-semibold">Department:</span> {{ employee?.company?.department ?? "no data" }}</p>
+        <p class="text-gray-600"><span class="font-semibold">Title:</span> {{ employee?.company?.title ?? "no data" }}</p>
+        <p class="text-gray-600"><span class="font-semibold">Status:</span> {{ employee?.role ?? "no data" }}</p>
+        <p class="text-gray-600"><span class="font-semibold">Hire Date:</span> {{ employee?.birthDate ?? "no data" }}</p>
 
         <!-- Edit Button -->
         <button

@@ -72,7 +72,7 @@
                     <Icon
                       icon="mdi:delete-forever"
                       style="color: crimson; font-size: 35px; cursor: pointer;"
-                      @click="openDelete(item.id)"
+                      @click="openDelete([item.id])"
                     />
                     <Icon
                     icon="mdi:eye-circle"
@@ -164,7 +164,6 @@ const columns = [
   { key: "role", label: "Status" },
 ]
 
-
 const props = defineProps<{
   items: any[]
   currentPage: number
@@ -174,7 +173,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(["search", "limit-change", "page-change", "delete-user", "showEmployee"])
-
 
 const openModal = ref(false)
 const jumpPage = ref<number | null>(null)
@@ -202,7 +200,8 @@ function goToPage() {
 }
 
 function handleDelete() {
-  if (deleteIds.value.length > 0) {
+  if (deleteIds.value.length > 0) 
+  {
     deleteIds.value.forEach((id) => {
       emit('delete-user', id)
     })
@@ -218,6 +217,7 @@ function handleCancel() {
 }
 
 function openDelete(ids: number[]) {
+  console.log(ids)
   deleteIds.value = ids
   openModal.value = true
 }

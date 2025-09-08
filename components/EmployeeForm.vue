@@ -103,7 +103,6 @@ import formatters from '~~/utils/formatters'
 
 const router = useRouter()
 
-
 const props = defineProps<{
   initial?: any
   submitLabel?: string
@@ -113,7 +112,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['submit'])
-
 
 const { handleSubmit,  } = useForm({
   validateOnMount: false,
@@ -131,7 +129,7 @@ const { handleSubmit,  } = useForm({
     department: yup.string().required('Department is required'),
     title: yup.string(),
     hireDate: yup.date().nullable(),
-    status: yup.string().required('Name is required'),
+    status: yup.string(),
   }),
 })
 

@@ -84,25 +84,19 @@ export function useEmployees() {
 
   // update employee (optimistic UI)
   async function updateEmployee(id: number, payload: any) {
-    const oldUser = employees.value.find((u) => u.id === id)
-    if (!oldUser) return
-
-    const backup = { ...oldUser }
-    Object.assign(oldUser, payload)
-
+    loading.value = true
     try {
       const data = await doFetch(`https://dummyjson.com/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-
-      Object.assign(oldUser, data)
+       employees.value =  data
       return data
     } catch (err) {
-      // rollback
-      Object.assign(oldUser, backup)
       throw err
+    }finally {
+      loading.value = false
     }
   }
 
@@ -111,7 +105,7 @@ export function useEmployees() {
     const backup = [...employees.value]
     employees.value = employees.value.filter((u) => u.id !== id)
     total.value--
-
+    loading.value = true
     try {
       await doFetch(`https://dummyjson.com/users/${id}`, { method: "DELETE" })
     } catch (err) {
@@ -119,6 +113,9 @@ export function useEmployees() {
       total.value++
       throw err
     }
+    finally {
+      loading.value = false
+    } 
   }
 
   // pagination helpers
