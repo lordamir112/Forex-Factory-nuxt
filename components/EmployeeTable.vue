@@ -14,11 +14,17 @@
             class="p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
           />
           <div class="flex items-center gap-2">
+            <Icon 
+              v-if="selectedIds.length > 0"
+              icon="mdi:delete-forever"
+              style="color: crimson; font-size: 35px; cursor: pointer;"
+              @click="openDelete(selectedIds)"
+              />
             <Icon
-            icon="mdi:add-circle"
-            style="color: green; font-size: 35px; cursor: pointer;"
-             title="Add Employee"
-            @click="router.push('/employees/new')"
+              icon="mdi:add-circle"
+              style="color: green; font-size: 35px; cursor: pointer;"
+              title="Add Employee"
+              @click="router.push('/employees/new')"
           />
           <select v-model="localLimit" class="p-2 border rounded">
             <option v-for="n in [10,25,50]" :key="n" :value="n">{{ n }}</option>
@@ -40,6 +46,9 @@
             <table class="min-w-full leading-normal table-auto shadow-2xl">
               <thead>
                 <tr class="bg-gray-100">
+                  <th class="px-5 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+                  </th>
                   <th
                     v-for="column in columns"
                     :key="column.key"
@@ -58,18 +67,27 @@
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr v-for="item in sortedItems" :key="item.id" class="hover:bg-gray-50">
+                  <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">
+                    <input type="checkbox" :value="item.id" v-model="selectedIds" />
+                  </td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.lastName }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.email }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.company.department }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.company.title }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ formatters.formatDate(item.birthDate) }}</td>
                   <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">{{ item.role }}</td>
-                  <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700">
+                  <td class="px-5 py-5 border-b border-gray-200 text-sm text-gray-700 flex gap-2">
                     <Icon
                       icon="mdi:delete-forever"
                       style="color: crimson; font-size: 35px; cursor: pointer;"
                       @click="openDelete(item.id)"
                     />
+                    <Icon
+                    icon="mdi:eye-circle"
+                    style="color: dodgerblue; font-size: 30px; cursor: pointer;"
+                    title="View employee"
+                    @click="emit('showEmployee', item)"
+                  />
                   </td>
                 </tr>
                 <tr v-if="!items.length && !props.loading">
@@ -139,63 +157,11 @@ import { Icon } from "@iconify/vue"
 import formatters from "../utils/formatters"
 import { useRouter } from "vue-router"
 import LoadingSpinner from "./LoadingSpinner.vue"
-const router = useRouter()
 import ConfirmModal from "./AlertModal.vue"
-const props = defineProps<{
-  items: any[]
-  currentPage: number
-  totalPages: number
-  limit: number
-  loading: boolean
-}>()
-const openModal = ref(false)
+import { useStore } from "../stores/store"
 
-
-const jumpPage = ref<number | null>(null)
-const deleteIds = ref<number[]>([])
-
-function goToPage() {
-  if (!jumpPage.value) return
-  const page = Math.min(Math.max(jumpPage.value, 1), props.totalPages)
-  emit('page-change', page)
-  jumpPage.value = null
-}
-
-
-function handleDelete() {
-  if (deleteIds.value.length > 0) {
-    deleteIds.value.forEach((id) => {
-      emit('delete-user', id) 
-    })
-    deleteIds.value = []
-  }
-  openModal.value = false
-}
-
-function handleCancel() {
-  openModal.value = false
-}
-
-function openDelete(id: number) {
-  deleteIds.value = [id] 
-  openModal.value = true
-}
-
-const emit = defineEmits(["search", "limit-change", "page-change", "delete-user"])
-
-// local states
-const localSearch = ref("")
-const localLimit = ref(props.limit || 10)
-
-// search sync
-watch(localSearch, (val) => emit("search", val))
-
-// limit sync
-watch(localLimit, (val) => emit("limit-change", val))
-
-// sorting (client-side, optional)
-const sortKey = ref("")
-const sortOrder = ref<"asc" | "desc">("asc")
+const store = useStore()
+const router = useRouter()
 
 const columns = [
   { key: "lastName", label: "Name" },
@@ -206,6 +172,64 @@ const columns = [
   { key: "role", label: "Status" },
 ]
 
+
+const props = defineProps<{
+  items: any[]
+  currentPage: number
+  totalPages: number
+  limit: number
+  loading: boolean
+}>()
+
+const emit = defineEmits(["search", "limit-change", "page-change", "delete-user", "showEmployee"])
+
+
+const openModal = ref(false)
+const jumpPage = ref<number | null>(null)
+const deleteIds = ref<number[]>([])
+const selectAll = ref(false)
+const selectedIds = ref<number[]>([])
+const localSearch = ref('')
+const localLimit = ref(props.limit || 10)
+const sortKey = ref("")
+const sortOrder = ref<"asc" | "desc">("asc")
+
+function toggleSelectAll() {
+  if (selectAll.value) {
+    selectedIds.value = props.items.map(item => item.id)
+  } else {
+    selectedIds.value = []
+  }
+}
+
+function goToPage() {
+  if (!jumpPage.value) return
+  const page = Math.min(Math.max(jumpPage.value, 1), props.totalPages)
+  emit('page-change', page)
+  jumpPage.value = null
+}
+
+function handleDelete() {
+  if (deleteIds.value.length > 0) {
+    deleteIds.value.forEach((id) => {
+      emit('delete-user', id)
+    })
+    deleteIds.value = []
+    selectedIds.value = []
+    selectAll.value = false
+  }
+  openModal.value = false
+}
+
+function handleCancel() {
+  openModal.value = false
+}
+
+function openDelete(ids: number[]) {
+  deleteIds.value = ids
+  openModal.value = true
+}
+
 function sortByColumn(key: string) {
   if (sortKey.value === key) {
     sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc"
@@ -214,6 +238,7 @@ function sortByColumn(key: string) {
     sortOrder.value = "asc"
   }
 }
+
 const sortedItems = computed(() => {
   if (!sortKey.value) return props.items
 
@@ -238,6 +263,26 @@ const sortedItems = computed(() => {
     return 0
   })
 })
+
+// search sync
+watch(localSearch, (val) => 
+{
+  store.setSearchQuery(localSearch.value)
+  emit("search", val)
+}
+)
+// limit sync
+watch(localLimit, (val) =>emit("limit-change", val))
+
+watch(() => props.items, () => {
+  selectAll.value = false
+  selectedIds.value = []
+})
+
+onMounted(() => {
+localSearch.value = store.tableOptions.searchQuery
+})
+
 
 
 </script>

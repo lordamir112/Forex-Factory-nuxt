@@ -1,22 +1,30 @@
 <script setup lang="ts">
 import EmployeeForm from "../../../../components/EmployeeForm.vue"
-import { useEmployees } from "../../../../composables/useEmployees"
+import { useStore } from "../../../../stores/store"
 import { useRoute, useRouter } from "vue-router"
 import { ref, onMounted } from "vue"
 
-const { employees, updateEmployee } = useEmployees()
 const route = useRoute()
 const router = useRouter()
+const store = useStore()
 
-const employee = ref<any>(null)
+const employee = ref<any | null>(null)
 
-onMounted(() => {
-  employee.value = employees.value.find((u) => u.id == route.params.id)
+onMounted(async () => {
+  const id = Number(route.params.id)
+  if (!store.selected || Number(store.selected.id) !== id) {
+    try {
+      await store.selectEmployee(id)
+    } catch (e) {
+      console.error("Failed to fetch selected employee:", e)
+    }
+  }
+  employee.value = store.selected
 })
 
 async function handleUpdate(payload: any) {
   try {
-    await updateEmployee(Number(route.params.id), payload)
+    await store.updateEmployee(Number(route.params.id), payload)
     router.push("/employees")
   } catch (e) {
     alert("Failed to update employee")
@@ -26,13 +34,19 @@ async function handleUpdate(payload: any) {
 
 <template>
   <div class="p-6">
+    <button class="mb-4 px-3 py-1 bg-gray-300 rounded" @click="router.push('/employees')">
+      ← Back to List
+    </button>
+
     <h1 class="text-xl font-bold mb-4">Edit Employee</h1>
+
     <EmployeeForm
       v-if="employee"
       :initial="employee"
       submit-label="Save"
       @submit="handleUpdate"
     />
+
     <p v-else>Loading...</p>
   </div>
 </template>
